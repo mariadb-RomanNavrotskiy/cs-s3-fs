@@ -1,0 +1,17 @@
+#cloud-config
+yum_repos:
+  epel-testing:
+    baseurl: https://cspkg.s3.amazonaws.com/develop-5/latest/centos8
+    enabled: true
+    gpgcheck: false
+    name: Columnstore Packages from develop-5 branch
+packages:
+- python3
+- nfs-utils
+runcmd:
+- file_system_id_1=fs-a1bf6b55
+- efs_mount_point_1=/var/lib/columnstore/storagemanager
+- mkdir -p "$${efs_mount_point_1}"
+- printf "\n$${file_system_id_1}.efs.us-east-1.amazonaws.com:/ $${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0\n" >> /etc/fstab
+- retryCnt=15; waitTime=30; while true; do mount -a -t nfs4 defaults; if [ $? = 0 ] || [ $retryCnt -lt 1 ]; then echo File system mounted successfully; break; fi; echo File system not available, retrying to mount.; ((retryCnt--)); sleep $waitTime; done;
+- dnf module -y disable mysql mariadb

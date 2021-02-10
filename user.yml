@@ -1,0 +1,11 @@
+---
+
+- hosts: eip
+  gather_facts: false
+  become: true
+
+  roles:
+  - role: user
+    vars:
+      user: drrtuy
+      user_groups: sudo
